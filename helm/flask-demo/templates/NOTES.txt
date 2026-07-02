@@ -1,0 +1,36 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Release Name:
+  {{ .Release.Name }}
+
+Namespace:
+  {{ .Release.Namespace }}
+
+Application:
+  {{ include "flask-demo.fullname" . }}
+
+Services:
+
+  Stable:
+    kubectl get svc {{ include "flask-demo.fullname" . }}-stable -n {{ .Release.Namespace }}
+
+  Canary:
+    kubectl get svc {{ include "flask-demo.fullname" . }}-canary -n {{ .Release.Namespace }}
+
+Rollout Status:
+
+  kubectl argo rollouts get rollout {{ include "flask-demo.fullname" . }} -n {{ .Release.Namespace }}
+
+Watch Rollout:
+
+  kubectl argo rollouts get rollout {{ include "flask-demo.fullname" . }} -n {{ .Release.Namespace }} --watch
+
+Prometheus Metrics:
+
+  /metrics
+
+Ingress:
+
+  kubectl get ingress -n {{ .Release.Namespace }}
+
+Enjoy Progressive Delivery with Argo Rollouts!

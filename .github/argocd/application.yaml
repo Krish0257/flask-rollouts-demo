@@ -19,12 +19,13 @@ spec:
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: flask-demo
 
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+      allowEmpty: false
 
     syncOptions:
       - CreateNamespace=true
