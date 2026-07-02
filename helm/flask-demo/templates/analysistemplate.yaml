@@ -1,5 +1,6 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
+
 metadata:
   name: flask-demo-analysis
   labels:
@@ -7,14 +8,15 @@ metadata:
 
 spec:
   metrics:
+    - name: error-rate
 
-    - name: success-rate
+      interval: 15s
 
-      interval: 30s
+      count: 6
 
-      count: 3
+      failureLimit: 1
 
-      successCondition: result[0] >= {{ .Values.analysis.successRate }}
+      successCondition: result[0] < {{ .Values.analysis.maxErrorRate }}
 
       provider:
         prometheus:
@@ -26,14 +28,14 @@ spec:
               sum(
                 rate(
                   flask_http_request_total{
-                    status!~"5.."
-                  }[2m]
+                    status=~"5.."
+                  }[1m]
                 )
               )
               /
               sum(
                 rate(
-                  flask_http_request_total[2m]
+                  flask_http_request_total[1m]
                 )
               )
             ) * 100
