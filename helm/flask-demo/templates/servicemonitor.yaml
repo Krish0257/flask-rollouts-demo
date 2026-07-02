@@ -5,10 +5,10 @@ kind: ServiceMonitor
 
 metadata:
   name: {{ include "flask-demo.fullname" . }}
+
   labels:
     {{- include "flask-demo.labels" . | nindent 4 }}
-
-    release: kube-prometheus-stack
+    release: {{ .Values.serviceMonitor.release }}
 
 spec:
 
@@ -21,11 +21,8 @@ spec:
       - {{ .Release.Namespace }}
 
   endpoints:
-
     - port: http
-
       path: {{ .Values.serviceMonitor.path }}
-
       interval: {{ .Values.serviceMonitor.interval }}
 
 {{- end }}
