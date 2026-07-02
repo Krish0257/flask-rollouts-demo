@@ -7,7 +7,7 @@ class Config:
     """
 
     APP_NAME = os.getenv("APP_NAME", "inventory-service")
-    APP_VERSION = os.getenv("APP_VERSION", "v1.0.0")
+    APP_VERSION = os.getenv("APP_VERSION", "v1.1.0")
     ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
     HOST = os.getenv("HOST", "0.0.0.0")
