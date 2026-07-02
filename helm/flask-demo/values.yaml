@@ -11,7 +11,7 @@ replicaCount: 2
 image:
   repository: 379515795932.dkr.ecr.ap-south-1.amazonaws.com/flask-demo
   pullPolicy: IfNotPresent
-  tag: "248fd125f30a6ea5d960a1c3f01e08b8b1092aeb"
+  tag: "164c134ae495eccd5eef0a532474ec3967fcc121"
 
 imagePullSecrets: []
 
