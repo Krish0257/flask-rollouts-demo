@@ -1,0 +1,108 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "flask-demo.fullname" . }}
+  labels:
+    {{- include "flask-demo.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.rollout.replicas }}
+
+  revisionHistoryLimit: {{ .Values.rollout.revisionHistoryLimit }}
+
+  selector:
+    matchLabels:
+      {{- include "flask-demo.selectorLabels" . | nindent 6 }}
+
+  template:
+    metadata:
+      labels:
+        {{- include "flask-demo.selectorLabels" . | nindent 8 }}
+
+    spec:
+      containers:
+        - name: {{ include "flask-demo.name" . }}
+
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          ports:
+            - name: http
+              containerPort: {{ .Values.container.port }}
+
+          env:
+            - name: APP_NAME
+              value: "{{ .Values.env.APP_NAME }}"
+
+            - name: APP_VERSION
+              value: "{{ .Values.env.APP_VERSION }}"
+
+            - name: ENVIRONMENT
+              value: "{{ .Values.env.ENVIRONMENT }}"
+
+            - name: FAILURE_RATE
+              value: "{{ .Values.env.FAILURE_RATE }}"
+
+            - name: RESPONSE_DELAY
+              value: "{{ .Values.env.RESPONSE_DELAY }}"
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.path }}
+              port: http
+
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.path }}
+              port: http
+
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+
+  strategy:
+    canary:
+
+      stableService: {{ include "flask-demo.fullname" . }}-stable
+
+      canaryService: {{ include "flask-demo.fullname" . }}-canary
+
+      trafficRouting:
+        nginx:
+          stableIngress: {{ include "flask-demo.fullname" . }}
+
+      steps:
+
+        - setWeight: 20
+
+        - pause:
+            duration: 30s
+
+        - analysis:
+            templates:
+              - templateName: flask-demo-analysis
+
+        - setWeight: 40
+
+        - pause:
+            duration: 30s
+
+        - analysis:
+            templates:
+              - templateName: flask-demo-analysis
+
+        - setWeight: 60
+
+        - pause:
+            duration: 30s
+
+        - analysis:
+            templates:
+              - templateName: flask-demo-analysis
+
+        - setWeight: 100

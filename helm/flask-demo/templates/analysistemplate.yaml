@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: flask-demo-analysis
+  labels:
+    {{- include "flask-demo.labels" . | nindent 4 }}
+
+spec:
+  metrics:
+
+    - name: success-rate
+
+      interval: 30s
+
+      count: 3
+
+      successCondition: result[0] >= {{ .Values.analysis.successRate }}
+
+      provider:
+        prometheus:
+
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+
+          query: |
+            (
+              sum(
+                rate(
+                  flask_http_request_total{
+                    status!~"5.."
+                  }[2m]
+                )
+              )
+              /
+              sum(
+                rate(
+                  flask_http_request_total[2m]
+                )
+              )
+            ) * 100
