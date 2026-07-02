@@ -1,0 +1,143 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: write
+
+env:
+  AWS_REGION: ap-south-1
+  AWS_ACCOUNT_ID: "379515795932"
+  ECR_REPOSITORY: flask-demo
+  IMAGE_NAME: flask-demo
+
+jobs:
+  deploy:
+    name: Build, Push and Update GitOps
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ------------------------------------------------------------
+      # Checkout
+      # ------------------------------------------------------------
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ------------------------------------------------------------
+      # Configure AWS Credentials (OIDC)
+      # ------------------------------------------------------------
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # ------------------------------------------------------------
+      # Login to Amazon ECR
+      # ------------------------------------------------------------
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # ------------------------------------------------------------
+      # Docker Buildx
+      # ------------------------------------------------------------
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ------------------------------------------------------------
+      # Build Docker Image
+      # ------------------------------------------------------------
+
+      - name: Build Docker Image
+        run: |
+          docker build \
+            -t $ECR_REPOSITORY:${GITHUB_SHA} \
+            .
+
+      # ------------------------------------------------------------
+      # Tag Image
+      # ------------------------------------------------------------
+
+      - name: Tag Docker Image
+        run: |
+          docker tag \
+            $ECR_REPOSITORY:${GITHUB_SHA} \
+            $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:${GITHUB_SHA}
+
+      # ------------------------------------------------------------
+      # Push Image
+      # ------------------------------------------------------------
+
+      - name: Push Docker Image
+        run: |
+          docker push \
+            $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:${GITHUB_SHA}
+
+      # ------------------------------------------------------------
+      # Install Helm
+      # ------------------------------------------------------------
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      # ------------------------------------------------------------
+      # Helm Lint
+      # ------------------------------------------------------------
+
+      - name: Helm Lint
+        run: |
+          helm lint helm/flask-demo
+
+      # ------------------------------------------------------------
+      # Update values.yaml
+      # ------------------------------------------------------------
+
+      - name: Update Helm Image Tag
+        run: |
+          sed -i "s/tag:.*/tag: \"${GITHUB_SHA}\"/" helm/flask-demo/values.yaml
+
+      # ------------------------------------------------------------
+      # Commit Updated Helm Chart
+      # ------------------------------------------------------------
+
+      - name: Commit Updated values.yaml
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add helm/flask-demo/values.yaml
+
+          git diff --cached --quiet || git commit -m "ci: update image tag ${GITHUB_SHA}"
+
+          git push
+
+      # ------------------------------------------------------------
+      # Summary
+      # ------------------------------------------------------------
+
+      - name: Deployment Summary
+        run: |
+          {
+            echo "## Continuous Deployment Summary"
+            echo ""
+            echo "- Docker Image Built"
+            echo "- Docker Image Pushed to Amazon ECR"
+            echo "- Helm values.yaml Updated"
+            echo "- GitOps Repository Updated"
+            echo "- ArgoCD will automatically synchronize"
+            echo ""
+            echo "### Image"
+            echo "\`${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${GITHUB_SHA}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
