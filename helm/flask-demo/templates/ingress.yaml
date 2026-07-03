@@ -9,22 +9,33 @@ metadata:
   labels:
     {{- include "flask-demo.labels" . | nindent 4 }}
 
+  {{- with .Values.ingress.annotations }}
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 
 spec:
   ingressClassName: {{ .Values.ingress.className }}
 
   rules:
-    - host: {{ (index .Values.ingress.hosts 0).host }}
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host }}
       http:
         paths:
-          - path: {{ (index (index .Values.ingress.hosts 0).paths 0).path }}
-            pathType: {{ (index (index .Values.ingress.hosts 0).paths 0).pathType }}
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ include "flask-demo.fullname" . }}-stable
+                name: {{ include "flask-demo.fullname" $ }}-stable
                 port:
-                  number: {{ .Values.service.port }}
+                  number: {{ $.Values.service.port }}
+          {{- end }}
+    {{- end }}
+
+  {{- with .Values.ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 
 {{- end }}

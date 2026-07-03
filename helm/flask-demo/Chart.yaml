@@ -1,30 +1,40 @@
 apiVersion: v2
+
 name: flask-demo
-description: Enterprise Flask Demo Application for GitOps and Progressive Delivery
+
+description: Enterprise Flask application demonstrating GitOps, Argo Rollouts, and Progressive Delivery
+
 type: application
 
 version: 0.1.0
-appVersion: "1.0.0"
 
-keywords:
-  - flask
-  - kubernetes
-  - argocd
-  - argo-rollouts
-  - prometheus
-  - grafana
-  - devops
-  - gitops
+appVersion: "1.2.0"
+
+kubeVersion: ">=1.30.0-0"
 
 home: https://github.com/Krish0257/flask-rollouts-demo
 
 sources:
   - https://github.com/Krish0257/flask-rollouts-demo
 
+keywords:
+  - flask
+  - kubernetes
+  - helm
+  - argocd
+  - argo-rollouts
+  - gitops
+  - prometheus
+  - grafana
+  - progressive-delivery
+  - devops
+
 maintainers:
   - name: Muralikrishna
     email: singampallimurali03@gmail.com
 
-kubeVersion: ">=1.30.0-0"
+annotations:
+  category: DevOps
+  licenses: MIT
 
 dependencies: []

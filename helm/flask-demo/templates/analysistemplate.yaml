@@ -3,6 +3,7 @@ kind: AnalysisTemplate
 
 metadata:
   name: flask-demo-analysis
+
   labels:
     {{- include "flask-demo.labels" . | nindent 4 }}
 
@@ -33,9 +34,12 @@ spec:
                 )
               )
               /
-              sum(
-                rate(
-                  flask_http_request_total[1m]
-                )
+              clamp_min(
+                sum(
+                  rate(
+                    flask_http_request_total[1m]
+                  )
+                ),
+                1
               )
             ) * 100

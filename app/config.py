@@ -3,18 +3,38 @@ import os
 
 class Config:
     """
-    Application configuration loaded from environment variables.
+    Centralized application configuration.
+
+    All configuration values are loaded from environment variables
+    with sensible defaults for local development.
     """
 
-    APP_NAME = os.getenv("APP_NAME", "inventory-service")
-    APP_VERSION = os.getenv("APP_VERSION", "v1.2.1")
-    ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+    # ------------------------------------------------------------------
+    # Application Information
+    # ------------------------------------------------------------------
+    APP_NAME: str = os.getenv("APP_NAME", "inventory-service")
+    APP_VERSION: str = os.getenv("APP_VERSION", "v1.2.1")
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
 
-    HOST = os.getenv("HOST", "0.0.0.0")
-    PORT = int(os.getenv("PORT", "5000"))
+    # ------------------------------------------------------------------
+    # Server Configuration
+    # ------------------------------------------------------------------
+    HOST: str = os.getenv("HOST", "0.0.0.0")
+    PORT: int = int(os.getenv("PORT", "5000"))
+    DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
 
-    DEBUG = os.getenv("DEBUG", "false").lower() == "true"
+    # ------------------------------------------------------------------
+    # Demo Configuration
+    #
+    # These settings intentionally simulate failures and latency to
+    # demonstrate Argo Rollouts automated canary analysis.
+    # ------------------------------------------------------------------
+    FAILURE_RATE: float = max(
+        0.0,
+        min(1.0, float(os.getenv("FAILURE_RATE", "0.5")))
+    )
 
-    FAILURE_RATE = float(os.getenv("FAILURE_RATE", "0.5"))
-
-    RESPONSE_DELAY = float(os.getenv("RESPONSE_DELAY", "0"))
+    RESPONSE_DELAY: float = max(
+        0.0,
+        float(os.getenv("RESPONSE_DELAY", "0"))
+    )

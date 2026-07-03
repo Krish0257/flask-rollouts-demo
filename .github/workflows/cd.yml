@@ -5,9 +5,15 @@ on:
     branches:
       - main
 
+  workflow_dispatch:
+
 permissions:
   id-token: write
   contents: write
+
+concurrency:
+  group: cd-main
+  cancel-in-progress: true
 
 env:
   AWS_REGION: ap-south-1
@@ -23,7 +29,7 @@ jobs:
     steps:
 
       # ------------------------------------------------------------
-      # Checkout
+      # Checkout Repository
       # ------------------------------------------------------------
 
       - name: Checkout Repository
@@ -57,33 +63,18 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       # ------------------------------------------------------------
-      # Build Docker Image
+      # Build and Push Docker Image
       # ------------------------------------------------------------
 
-      - name: Build Docker Image
-        run: |
-          docker build \
-            -t $ECR_REPOSITORY:${GITHUB_SHA} \
-            .
-
-      # ------------------------------------------------------------
-      # Tag Image
-      # ------------------------------------------------------------
-
-      - name: Tag Docker Image
-        run: |
-          docker tag \
-            $ECR_REPOSITORY:${GITHUB_SHA} \
-            $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:${GITHUB_SHA}
-
-      # ------------------------------------------------------------
-      # Push Image
-      # ------------------------------------------------------------
-
-      - name: Push Docker Image
-        run: |
-          docker push \
-            $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:${GITHUB_SHA}
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # ------------------------------------------------------------
       # Install Helm
@@ -97,11 +88,10 @@ jobs:
       # ------------------------------------------------------------
 
       - name: Helm Lint
-        run: |
-          helm lint helm/flask-demo
+        run: helm lint helm/flask-demo
 
       # ------------------------------------------------------------
-      # Update values.yaml
+      # Update Helm values.yaml
       # ------------------------------------------------------------
 
       - name: Update Helm Image Tag
@@ -109,7 +99,7 @@ jobs:
           sed -i "s/tag:.*/tag: \"${GITHUB_SHA}\"/" helm/flask-demo/values.yaml
 
       # ------------------------------------------------------------
-      # Commit Updated Helm Chart
+      # Commit Updated values.yaml
       # ------------------------------------------------------------
 
       - name: Commit Updated values.yaml
@@ -119,12 +109,15 @@ jobs:
 
           git add helm/flask-demo/values.yaml
 
-          git diff --cached --quiet || git commit -m "ci: update image tag ${GITHUB_SHA}"
-
-          git push
+          if git diff --cached --quiet; then
+            echo "No changes detected."
+          else
+            git commit -m "ci: update image tag ${GITHUB_SHA}"
+            git push
+          fi
 
       # ------------------------------------------------------------
-      # Summary
+      # Deployment Summary
       # ------------------------------------------------------------
 
       - name: Deployment Summary
@@ -132,12 +125,15 @@ jobs:
           {
             echo "## Continuous Deployment Summary"
             echo ""
-            echo "- Docker Image Built"
-            echo "- Docker Image Pushed to Amazon ECR"
-            echo "- Helm values.yaml Updated"
-            echo "- GitOps Repository Updated"
-            echo "- ArgoCD will automatically synchronize"
+            echo "| Component | Status |"
+            echo "|----------|--------|"
+            echo "| Docker Build | ✅ |"
+            echo "| Amazon ECR Push | ✅ |"
+            echo "| Helm Update | ✅ |"
+            echo "| GitOps Commit | ✅ |"
+            echo "| Argo CD Sync | Automatic |"
             echo ""
             echo "### Image"
+            echo ""
             echo "\`${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${GITHUB_SHA}\`"
           } >> "$GITHUB_STEP_SUMMARY"

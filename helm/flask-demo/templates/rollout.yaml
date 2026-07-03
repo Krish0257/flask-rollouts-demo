@@ -1,13 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
+
 metadata:
   name: {{ include "flask-demo.fullname" . }}
   labels:
     {{- include "flask-demo.labels" . | nindent 4 }}
+
 spec:
   replicas: {{ .Values.rollout.replicas }}
 
   revisionHistoryLimit: {{ .Values.rollout.revisionHistoryLimit }}
+
+  progressDeadlineSeconds: {{ .Values.rollout.progressDeadlineSeconds }}
+
+  progressDeadlineAbort: {{ .Values.rollout.progressDeadlineAbort }}
 
   selector:
     matchLabels:
@@ -18,13 +24,26 @@ spec:
       labels:
         {{- include "flask-demo.selectorLabels" . | nindent 8 }}
 
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.container.port }}"
+        prometheus.io/path: "/metrics"
+
     spec:
+      serviceAccountName: {{ include "flask-demo.serviceAccountName" . }}
+
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+
       containers:
         - name: {{ include "flask-demo.name" . }}
 
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
 
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
 
           ports:
             - name: http
@@ -77,32 +96,4 @@ spec:
           stableIngress: {{ include "flask-demo.fullname" . }}
 
       steps:
-
-        - setWeight: 20
-
-        - pause:
-            duration: 30s
-
-        - analysis:
-            templates:
-              - templateName: flask-demo-analysis
-
-        - setWeight: 40
-
-        - pause:
-            duration: 30s
-
-        - analysis:
-            templates:
-              - templateName: flask-demo-analysis
-
-        - setWeight: 60
-
-        - pause:
-            duration: 30s
-
-        - analysis:
-            templates:
-              - templateName: flask-demo-analysis
-
-        - setWeight: 100
+        {{- toYaml .Values.rollout.strategy.canary.steps | nindent 8 }}
