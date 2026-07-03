@@ -9,7 +9,7 @@ metadata:
 
 spec:
   metrics:
-    - name: error-rate
+    - name: success-rate
 
       interval: 15s
 
@@ -17,7 +17,7 @@ spec:
 
       failureLimit: 1
 
-      successCondition: result[0] < {{ .Values.analysis.maxErrorRate }}
+      successCondition: result[0] >= {{ .Values.analysis.successRate }}
 
       provider:
         prometheus:
@@ -29,15 +29,15 @@ spec:
               sum(
                 rate(
                   flask_http_request_total{
-                    status=~"5.."
-                  }[1m]
+                    status!~"5.."
+                  }[2m]
                 )
               )
               /
               clamp_min(
                 sum(
                   rate(
-                    flask_http_request_total[1m]
+                    flask_http_request_total[2m]
                   )
                 ),
                 1

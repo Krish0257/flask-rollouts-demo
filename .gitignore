@@ -62,3 +62,4 @@ Thumbs.db
 .terraform/
 *.tfstate
 *.tfstate.*kubectl-argo-rollouts.exe
+kubectl-argo-rollouts.exe
