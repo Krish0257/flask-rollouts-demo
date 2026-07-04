@@ -1,106 +1,128 @@
-# 🚀 Flask Progressive Delivery Platform on Amazon EKS
+# 🚀 Flask Progressive Delivery Demo
 
-> Enterprise-grade GitOps Progressive Delivery demonstration using Argo Rollouts, Argo CD, Helm, Prometheus, Grafana, GitHub Actions, and Amazon EKS.
+> Enterprise-grade GitOps Progressive Delivery using **Argo CD**, **Argo Rollouts**, **GitHub Actions**, **Helm**, **Prometheus**, **Grafana**, and **Amazon EKS**.
 
-![Platform](https://img.shields.io/badge/Platform-AWS-orange)
-![Kubernetes](https://img.shields.io/badge/Kubernetes-EKS-blue)
-![GitOps](https://img.shields.io/badge/GitOps-ArgoCD-red)
-![Progressive Delivery](https://img.shields.io/badge/Progressive%20Delivery-Argo%20Rollouts-success)
-![Helm](https://img.shields.io/badge/Helm-v3-blueviolet)
-![Terraform](https://img.shields.io/badge/Terraform-IaC-623CE4)
-![Prometheus](https://img.shields.io/badge/Monitoring-Prometheus-orange)
-![Grafana](https://img.shields.io/badge/Visualization-Grafana-F46800)
+![Python](https://img.shields.io/badge/Python-Flask-blue?logo=python)
+![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-EKS-326CE5?logo=kubernetes)
+![ArgoCD](https://img.shields.io/badge/GitOps-ArgoCD-EF7B4D)
+![Rollouts](https://img.shields.io/badge/Progressive-Delivery-success)
 ![GitHub Actions](https://img.shields.io/badge/CI/CD-GitHub_Actions-2088FF)
+![Prometheus](https://img.shields.io/badge/Monitoring-Prometheus-E6522C)
+![Grafana](https://img.shields.io/badge/Visualization-Grafana-F46800)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
 # 📖 Overview
 
-This repository demonstrates an **enterprise-grade GitOps Progressive Delivery platform** deployed on **Amazon EKS**.
+This repository demonstrates an enterprise-grade GitOps Progressive Delivery workflow on Amazon EKS.
 
-The project showcases how modern DevOps teams safely release new application versions using **Argo Rollouts Canary Deployments** with **automated rollback** based on **Prometheus metrics**.
+The application is packaged with Helm, deployed using Argo CD, released progressively with Argo Rollouts, monitored using Prometheus, visualized with Grafana, and built automatically through GitHub Actions.
 
-Instead of deploying directly to production, new application versions are released gradually while continuously monitoring application health. If the error rate exceeds the configured threshold, Argo Rollouts automatically aborts the rollout and restores the previous stable version.
-
-The infrastructure required to run this application—including Amazon EKS, networking, IAM, GitHub OIDC, monitoring, ingress, and platform add-ons—is managed in a **separate Platform repository** using Terraform.
+New versions are deployed as Canary Releases. During rollout, Prometheus continuously evaluates application metrics. If the configured threshold is violated, Argo Rollouts automatically aborts the deployment and restores the previous stable version.
 
 ---
 
-# 🎯 Project Objectives
+# 🏗️ Architecture
 
-- Demonstrate Enterprise GitOps workflows
-- Implement Progressive Delivery using Argo Rollouts
-- Automate Canary Deployments
-- Perform Metric-Based Automated Rollback
-- Integrate Prometheus Monitoring
-- Visualize Metrics with Grafana
-- Build CI/CD using GitHub Actions
-- Store container images in Amazon ECR
-- Deploy applications using Helm and Argo CD
-- Follow Kubernetes production best practices
+<p align="center">
+<img src="docs/Architecture.png" width="100%">
+</p>
 
 ---
 
-# 🏗 Repository Architecture
+# 🎯 Features
 
-This project intentionally separates **Platform Engineering** and **Application Delivery** responsibilities.
-
-## Platform Repository
-
-Responsible for provisioning and managing the Kubernetes platform.
-
-Features include:
-
-- Terraform Infrastructure
-- Amazon VPC
-- Amazon EKS
-- IAM Roles
-- GitHub OIDC
-- NGINX Ingress Controller
-- Prometheus Stack
-- Grafana
-- Metrics Server
-- Argo CD
-- Argo Rollouts
-
----
-
-## Application Repository (This Repository)
-
-Responsible for application delivery.
-
-Features include:
-
-- Flask Application
-- Docker
-- Helm Chart
-- GitHub Actions CI
-- GitHub Actions CD
+- Flask REST API
+- Dockerized Application
+- Helm-based Kubernetes Deployment
+- GitHub Actions CI/CD
 - Amazon ECR Image Publishing
-- GitOps Deployment
-- Canary Rollouts
-- Automated Rollback
-- Prometheus Metrics
-- Grafana Dashboards
-
----
-
-# ⭐ Key Features
-
-- Enterprise Flask Application
-- Dockerized Deployment
-- Amazon ECR Integration
-- Helm-Based Kubernetes Deployment
 - GitOps with Argo CD
-- Progressive Delivery with Argo Rollouts
-- Canary Deployment Strategy
-- Automated Rollback
+- Canary Deployments
+- Automated Metric Analysis
+- Automatic Rollback
 - Prometheus Monitoring
 - Grafana Dashboards
-- ServiceMonitor Integration
-- GitHub Actions CI/CD
-- Security Scanning using Trivy
-- Non-Root Docker Container
-- Production-Ready Helm Templates
+- Kubernetes ServiceMonitor
 
 ---
+
+# 📂 Repository Structure
+
+```text
+flask-rollouts-demo/
+├── .github/
+├── app/
+├── argocd/
+├── docs/
+├── helm/
+├── Dockerfile
+├── requirements.txt
+├── run.py
+├── VERSION
+├── README.md
+└── LICENSE
+```
+
+---
+
+# 🛠 Technology Stack
+
+| Category | Technology |
+|-----------|------------|
+| Language | Python (Flask) |
+| Containerization | Docker |
+| Kubernetes | Amazon EKS |
+| Helm | Helm |
+| GitOps | Argo CD |
+| Progressive Delivery | Argo Rollouts |
+| Monitoring | Prometheus |
+| Dashboards | Grafana |
+| CI/CD | GitHub Actions |
+| Registry | Amazon ECR |
+
+---
+
+# 📸 Screenshots
+
+## Architecture
+
+<img src="docs/Architecture.png" width="100%">
+
+## Amazon EKS
+
+<img src="docs/EKS.png" width="100%">
+
+## GitHub Actions
+
+<img src="docs/Githubactions.png" width="100%">
+
+## Argo CD
+
+<img src="docs/Argo CD.png" width="100%">
+
+## Argo Rollouts
+
+<img src="docs/Argo-rollout.png" width="100%">
+
+## Rollout Analysis
+
+<img src="docs/argo-rollout-1.png" width="100%">
+
+---
+
+# 👨‍💻 Author
+
+**Murali Krishna**
+
+Cloud & DevOps Engineer
+
+AWS • Terraform • Kubernetes • Docker • GitHub Actions • Argo CD • Argo Rollouts • Prometheus • Grafana
+
+---
+
+# 📄 License
+
+MIT License
