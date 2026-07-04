@@ -111,6 +111,29 @@ flask-rollouts-demo/
 
 <img src="docs/argo-rollout-1.png" width="100%">
 
+
+# 🏗️ Platform Repository
+
+This application is deployed on an enterprise Kubernetes platform provisioned using Terraform.
+
+The platform repository provisions and manages:
+
+- Amazon VPC
+- Public & Private Networking
+- IAM Roles & Policies
+- Amazon EKS
+- Amazon ECR
+- NGINX Ingress Controller
+- Prometheus & Grafana
+- Argo CD
+- Argo Rollouts
+- Metrics Server
+- GitHub OIDC Authentication
+
+🔗 **Platform Repository**
+
+https://github.com/Krish0257/terraform-aws-platform
+
 ---
 
 # 👨‍💻 Author
